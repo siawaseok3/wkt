@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%- (channel && channel.metadata && channel.metadata.title) || "存在しないチャンネル" %></title>
+    <title><%- channel?.metadata?.title || "存在しないチャンネル" %></title>
     <link rel="stylesheet" href="/css/page.css">
     <script src="/js/tailwindcss.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -24,17 +24,17 @@
     </header>
   
     <div class="container mx-auto p-3 pt-2">
-        <img src="<%- (channel && channel.header && channel.header.content && channel.header.content.banner && channel.header.content.banner.image && channel.header.content.banner.image[0] && channel.header.content.banner.image[0].url) || "" %>" class="w-full h-auto mr-4">
+        <img src="<%- channel?.header?.content?.banner?.image?.[0]?.url || '' %>" class="w-full h-40 object-cover rounded">
         <div class="bg-gray-800 p-8 rounded-lg shadow-lg mt-4">
             <div class="flex items-center mb-6">
-                <img src="<%- (channel && channel.metadata && channel.metadata.avatar && channel.metadata.avatar[0] && channel.metadata.avatar[0].url) || "" %>" class="w-20 h-20 rounded-full mr-4">
+                <img src="<%- channel?.metadata?.avatar?.[0]?.url || "" %>" class="w-20 h-20 rounded-full mr-4">
                 <div>
-                    <h1 class="text-3xl font-bold"><%- (channel && channel.metadata && channel.metadata.title) || "タイトルなし" %></h1>
+                    <h1 class="text-3xl font-bold"><%- channel?.metadata?.title || "タイトルなし" %></h1>
                     <%
-                      const metaRows = channel && channel.header && channel.header.content && channel.header.content.metadata && channel.header.content.metadata.metadata_rows;
-                      const firstText = metaRows && metaRows[0] && metaRows[0].metadata_parts && metaRows[0].metadata_parts[0] ? metaRows[0].metadata_parts[0].text : "";
-                      const secondText = metaRows && metaRows[1] && metaRows[1].metadata_parts && metaRows[1].metadata_parts[1] ? metaRows[1].metadata_parts[1].text : "";
-                      const secondRowFirstPartText = metaRows && metaRows[1] && metaRows[1].metadata_parts && metaRows[1].metadata_parts[0] ? metaRows[1].metadata_parts[0].text : "";
+                      const metaRows = channel?.header?.content?.metadata?.metadata_rows;
+                      const firstText = metaRows?.[0]?.metadata_parts?.[0]?.text || "";
+                      const secondText = metaRows?.[1]?.metadata_parts?.[1]?.text || "";
+                      const secondRowFirstPartText = metaRows?.[1]?.metadata_parts?.[0]?.text || "";
                     %>
                     <p class="text-gray-400 text-sm"><%- firstText %> - <%- secondText %></p>
                     <p class="text-gray-500 text-sm mt-2"><%- secondRowFirstPartText %></p>
@@ -54,8 +54,8 @@
                 最近の動画
             </li>
         <% (channel?.shelves || []).forEach((shelf, index) => { %>
-            <li class="p-2 hover:bg-gray-700 cursor-pointer" onclick="selectTab('<%= shelf.title.text %>', <%= index %>)">
-                <%= shelf.title.text %>
+            <li class="p-2 hover:bg-gray-700 cursor-pointer" onclick="selectTab('<%= shelf.title?.text %>', <%= index %>)">
+                <%= shelf.title?.text %>
             </li>
         <% }) %>
         </ul>
@@ -64,7 +64,7 @@
     <div class="recent-videos mt-4" id="recentVideos">
         <h2 class="text-xl font-bold text-white mb-2">最近の動画</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            <% recentVideos.items.forEach(video => { %>
+            <% recentVideos?.items?.forEach(video => { %>
                 <div class="result-item bg-gray-700 p-4 rounded">
                     <a href="/wkt/watch/<%= video.id %>" class="thumbnail">
                         <img loading="lazy" src="/wkt/back/vi/<%= video.id %>/mqdefault.jpg" alt="<%= video.title %>" class="w-auto h-48 rounded">
@@ -76,12 +76,12 @@
         </div>
     </div>
     
-    <% channel.shelves?.forEach((shelf, index) => { %>
+    <% channel?.shelves?.forEach((shelf, index) => { %>
         <div class="shelf-content mt-4 <%= index === 0 ? '' : 'hidden' %>" id="shelf-<%= index %>" data-tab-index="<%= index %>">
-            <h2 class="text-xl font-bold text-white mb-2"><%= shelf.title.text %></h2>
+            <h2 class="text-xl font-bold text-white mb-2"><%= shelf.title?.text %></h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                <% shelf.content?.items?.forEach(video => { %>
-                  <% if (video.type.endsWith("Video")) { %>
+                <% shelf?.content?.items?.forEach(video => { %>
+                  <% if (video?.type?.endsWith("Video")) { %>
                     <div class="result-item bg-gray-700 p-4 rounded">
                         <a href="/wkt/watch/<%= video.id %>" class="thumbnail">
                             <img loading="lazy" src="/wkt/back/vi/<%= video.id %>/mqdefault.jpg" alt="<%= video.title %>" class="w-auto h-48 rounded">
@@ -90,27 +90,27 @@
                         <p class="text-lg font-bold mt-2 text-white"><%= video.title %></p>
                         <p class="text-xs text-gray-400"><%= video.short_view_count || video.views %> - <%= video.published %></p>
                     </div>
-              <% } else if (video.type.endsWith("Playlist")) { %>
-                <div class="bg-gray-600 p-4 rounded">
-                  <a href="/wkt/p/<%= video.id %>">
-                    <img src="/vi/<%= video?.endpoint?.payload?.videoId || video.first_videos[0]?.id %>/mqdefault.jpg" alt="<%= video.title.text %>" class="w-full h-auto rounded">
-                  </a>
-                    <div class="mt-2">
-                        <p class="text-sm text-gray-400"><a href="/wkt/u/<%= video.author.id %>"><%= video.author.name %></a></p>
-                        <p class="text-lg font-bold">プレイリスト(<%= video.video_count?.text %>本以上の動画)</p>
+                  <% } else if (video?.type?.endsWith("Playlist")) { %>
+                    <div class="bg-gray-600 p-4 rounded">
+                      <a href="/wkt/p/<%= video.id %>">
+                        <img src="/vi/<%= video?.endpoint?.payload?.videoId || video?.first_videos?.[0]?.id %>/mqdefault.jpg" alt="<%= video.title?.text %>" class="w-full h-auto rounded">
+                      </a>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-400"><a href="/wkt/u/<%= video.author?.id %>"><%= video.author?.name %></a></p>
+                            <p class="text-lg font-bold">プレイリスト(<%= video.video_count?.text %>本以上の動画)</p>
+                        </div>
                     </div>
-                </div>
-    　　　　　　<% } else if (video.type.endsWith("Channel")) { %>
-                <div class="bg-gray-700 p-4 rounded">
-                  <a href="/wkt/c/<%= video.author.id %>">
-                    <img src="<%= video.author.thumbnails[0].url %>" alt="<%= video.author.name %>" class="w-full h-auto rounded">
-                  </a>
-                    <div class="mt-2">
-                        <p class="text-lg font-bold"><%= video.author.name %></p>
-                        <p class="text-xs text-gray-500"><%= video.subscribers.text %> • <%= video.videos?.text || video.video_count?.text %></p>
+                  <% } else if (video?.type?.endsWith("Channel")) { %>
+                    <div class="bg-gray-700 p-4 rounded">
+                      <a href="/wkt/c/<%= video.author?.id %>">
+                        <img src="<%= video.author?.thumbnails?.[0]?.url %>" alt="<%= video.author?.name %>" class="w-full h-auto rounded">
+                      </a>
+                        <div class="mt-2">
+                            <p class="text-lg font-bold"><%= video.author?.name %></p>
+                            <p class="text-xs text-gray-500"><%= video.subscribers?.text %> • <%= video.videos?.text || video.video_count?.text %></p>
+                        </div>
                     </div>
-                </div>
-              <% } %>
+                  <% } %>
                 <% }); %>
             </div>
         </div>
@@ -152,4 +152,4 @@ document.addEventListener("click", (event) => {
 </script>
                       
 </body>
-</html>                  
+</html>
