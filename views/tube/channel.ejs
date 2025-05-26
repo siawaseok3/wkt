@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%- channel.metadata.title || "存在しないチャンネル" %></title>
+    <title><%- (channel && channel.metadata && channel.metadata.title) || "存在しないチャンネル" %></title>
     <link rel="stylesheet" href="/css/page.css">
     <script src="/js/tailwindcss.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -24,17 +24,23 @@
     </header>
   
     <div class="container mx-auto p-3 pt-2">
-      　<img src="<%- channel.header?.content?.banner?.image?.[0]?.url || ""  %>" class="w-full h-auto mr-4">
+        <img src="<%- (channel && channel.header && channel.header.content && channel.header.content.banner && channel.header.content.banner.image && channel.header.content.banner.image[0] && channel.header.content.banner.image[0].url) || "" %>" class="w-full h-auto mr-4">
         <div class="bg-gray-800 p-8 rounded-lg shadow-lg mt-4">
             <div class="flex items-center mb-6">
-                <img src="<%- channel.metadata.avatar[0].url || ""  %>" class="w-20 h-20 rounded-full mr-4">
+                <img src="<%- (channel && channel.metadata && channel.metadata.avatar && channel.metadata.avatar[0] && channel.metadata.avatar[0].url) || "" %>" class="w-20 h-20 rounded-full mr-4">
                 <div>
-                    <h1 class="text-3xl font-bold"><%- channel.metadata.title %></h1>
-                    <p class="text-gray-400 text-sm"><%- channel.header.content.metadata.metadata_rows[0].metadata_parts[0].text || ""  %>  -  <%- channel.header.content.metadata.metadata_rows[1].metadata_parts[1].text || ""  %></p>
-                    <p class="text-gray-500 text-sm mt-2"><%- channel.header.content.metadata.metadata_rows[1].metadata_parts[0].text || ""  %></p>
+                    <h1 class="text-3xl font-bold"><%- (channel && channel.metadata && channel.metadata.title) || "タイトルなし" %></h1>
+                    <%
+                      const metaRows = channel && channel.header && channel.header.content && channel.header.content.metadata && channel.header.content.metadata.metadata_rows;
+                      const firstText = metaRows && metaRows[0] && metaRows[0].metadata_parts && metaRows[0].metadata_parts[0] ? metaRows[0].metadata_parts[0].text : "";
+                      const secondText = metaRows && metaRows[1] && metaRows[1].metadata_parts && metaRows[1].metadata_parts[1] ? metaRows[1].metadata_parts[1].text : "";
+                      const secondRowFirstPartText = metaRows && metaRows[1] && metaRows[1].metadata_parts && metaRows[1].metadata_parts[0] ? metaRows[1].metadata_parts[0].text : "";
+                    %>
+                    <p class="text-gray-400 text-sm"><%- firstText %> - <%- secondText %></p>
+                    <p class="text-gray-500 text-sm mt-2"><%- secondRowFirstPartText %></p>
                 </div>
             </div>
-          <p class="text-gray-400 mt-4"><%- channel.metadata.description || ""  %></p>
+          <p class="text-gray-400 mt-4"><%- channel?.metadata?.description || "" %></p>
         </div>
 
 <div class="mt-6">
@@ -47,11 +53,11 @@
             <li class="p-2 hover:bg-gray-700 cursor-pointer" onclick="selectRecentVideos()">
                 最近の動画
             </li>
-            <% channel.shelves?.forEach((shelf, index) => { %>
-                <li class="p-2 hover:bg-gray-700 cursor-pointer" onclick="selectTab('<%= shelf.title.text %>', <%= index %>)">
-                    <%= shelf.title.text %>
-                </li>
-            <% }); %>
+        <% (channel?.shelves || []).forEach((shelf, index) => { %>
+            <li class="p-2 hover:bg-gray-700 cursor-pointer" onclick="selectTab('<%= shelf.title.text %>', <%= index %>)">
+                <%= shelf.title.text %>
+            </li>
+        <% }) %>
         </ul>
     </div>
     
